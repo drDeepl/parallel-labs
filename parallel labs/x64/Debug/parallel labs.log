@@ -1,2 +1,3 @@
 ﻿  parallel labs.cpp
+C:\Users\mrvli\source\repos\parallel labs\parallel labs\parallel labs.cpp(219,24): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
   parallel labs.vcxproj -> C:\Users\mrvli\source\repos\parallel labs\x64\Debug\parallel labs.exe

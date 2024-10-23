@@ -62,7 +62,7 @@ std::cout << "Sum= " << total_sum << std::endl;
 }
 
 
-void tastk3(int SIZE) {
+void task3_fill_array(int SIZE) {
     
     auto startParallel = std::chrono::high_resolution_clock::now();
     
@@ -117,6 +117,135 @@ void tastk3(int SIZE) {
 
 }
 
+
+
+// Последовательное вычисление суммы
+int sumSequential(const std::vector<int>& vec) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    int sum = 0;
+    for (int num : vec) {
+        sum += num;
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Вычисление суммы элементов вектора последовательно]: " << durationParallel.count() << " секунд" << std::endl;
+    return sum;
+}
+
+// Параллельное вычисление суммы с редукцией
+int sumParallelReduction(const std::vector<int>& vec) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    int sum = 0;
+#pragma omp parallel for reduction(+:sum)
+    for (int i = 0; i < vec.size(); ++i) {
+        sum += vec[i];
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Вычисление суммы элементов вектора параллельно с редукцией]: " << durationParallel.count() << " секунд" << std::endl;
+    return sum;
+}
+
+// Параллельное вычисление суммы с критической секцией
+int sumParallelCritical(const std::vector<int>& vec) {
+    auto start = std::chrono::high_resolution_clock::now();
+    int sum = 0;
+#pragma omp parallel for
+    for (int i = 0; i < vec.size(); ++i) {
+#pragma omp critical
+        {
+            sum += vec[i];
+        }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Вычисление суммы элементов вектора параллельно с секцией]: " << durationParallel.count() << " секунд" << std::endl;
+    return sum;
+}
+
+
+void task3_summ_els(const std::vector<int>& vec) {
+    sumSequential(vec);
+    sumParallelReduction(vec);
+    sumParallelCritical(vec);
+}
+
+
+// Последовательное сложение
+void add_vectors_sequential(const std::vector<int>& a, const std::vector<int>& b, std::vector<int>& result) {
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    for (int i = 0; i < a.size(); ++i) {
+        result[i] = a[i] + b[i];
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Сложение последовательное]: " << durationParallel.count() << " секунд" << std::endl;
+
+}
+
+// Параллельное сложение (FOR)
+void add_vectors_parallel_for(const std::vector<int>& a, const std::vector<int>& b, std::vector<int>& result) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+#pragma omp parallel for
+    for (int i = 0; i < a.size(); ++i) {
+        result[i] = a[i] + b[i];
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Сложение параллельное FOR]: " << durationParallel.count() << " секунд" << std::endl;
+}
+
+// Параллельное сложение (Sections)
+void add_vectors_parallel_sections(const std::vector<int>& a, const std::vector<int>& b, std::vector<int>& result) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+#pragma omp parallel sections
+    {
+#pragma omp section
+        {
+            for (int i = 0; i < a.size() / 2; ++i) {
+                result[i] = a[i] + b[i];
+            }
+        }
+
+#pragma omp section
+        {
+            for (int i = a.size() / 2; i < a.size(); ++i) {
+                result[i] = a[i] + b[i];
+            }
+        }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> durationParallel = end - start;
+    std::cout << "[Сложение параллельное SECTION]: " << durationParallel.count() << " секунд" << std::endl;
+}
+
+void lab_3_add_vectors(int VECTOR_SIZE) {
+    
+    std::vector<int> a(VECTOR_SIZE);
+    std::vector<int> b(VECTOR_SIZE);
+    std::vector<int> result(VECTOR_SIZE);
+
+    add_vectors_sequential(a, b, result);
+    add_vectors_parallel_for(a, b, result);
+    add_vectors_parallel_sections(a, b, result);
+    task3_summ_els(result);
+
+
+
+}
+
+
+
+
+
 int main()
 {
     setlocale(LC_ALL, "");
@@ -129,7 +258,8 @@ int main()
     //greetWithCout(num_threads);
     //greetWithPrint(num_threads);
     //task2();
-    tastk3(10000000);
+    //task3_fill_array(10000000);
+    lab_3_add_vectors(1000000);
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
